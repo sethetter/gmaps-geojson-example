@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8' />
+  <title>GeoJSON Example</title>
+  <style>
+    #map { width: 800px; height: 600px; background: #ccc; }
+  </style>
+</head>
+<body>
+
+  <!-- The map will be placed in this div -->
+  <div id="map"></div>
+
+  <script>
+    function initMap() {
+      // Create the map
+      var mapDiv = document.getElementById('map');
+      var map = new google.maps.Map(mapDiv, {
+        center: { lat: 37.6872, lng: -97.3301 },
+        zoom: 11
+      });
+      var infoWindow = new google.maps.InfoWindow();
+      
+
+      //map.data.loadGeoJson('facilities.json');
+
+      // Load the data!
+      $.get('./facilities.json', function(json) {
+
+        // Process each facility in the data
+        json.features.forEach(function(facility) {
+          var props = facility.properties;
+          var coords = facility.geometry.coordinates;
+          var latLng = new google.maps.LatLng(coords[1], coords[0]);
+
+          var label = {
+            text: props.SITETYPE
+          };
+
+          var marker = new google.maps.Marker({
+            clickable: true,
+            label: label,
+            map: map,
+            position: latLng
+          });
+
+          addInfoWindowToMarker(marker, props);
+        });
+
+        function addInfoWindowToMarker(marker, props) {
+          google.maps.event.addListener(marker, 'click', function(e) {
+            infoWindow.setContent(props.ALIAS + ' (' + props.SITETYPE + ')');
+            infoWindow.open(map, marker);
+          });
+        }
+      });
+
+    }
+  </script>
+
+  <!-- Pull in jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+
+  <!-- Pull in the Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?callback=initMap"
+    async defer></script>
+
+</body>
+</html>
